@@ -1,0 +1,45 @@
+name: Track GitHub Releases
+on:
+  schedule:
+    - cron: "0 */3 * * *"  # 每3小时检查一次‌:ml-citation{ref="2" data="citationList"}
+
+jobs:
+  check-releases:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检查目标仓库Releases更新
+        env:
+          REPO_LIST: "acidanthera/OpenCorePkg"  # 监控仓库列表，空格分隔‌:ml-citation{ref="2" data="citationList"}
+          BARK_KEY: ${{ secrets.BARK_KEY }}          # Bark设备密钥‌:ml-citation{ref="1" data="citationList"}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}          # GitHub API认证令牌‌:ml-citation{ref="2" data="citationList"}
+        run: |
+          for repo in $REPO_LIST; do
+            # 获取最新Release数据
+            RELEASE_JSON=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$repo/releases/latest" || echo "{}")
+            
+            LATEST_TAG=$(echo "$RELEASE_JSON" | jq -r .tag_name)
+            RELEASE_NAME=$(echo "$RELEASE_JSON" | jq -r .name | tr -d '\n' | cut -c 1-50)
+            RELEASE_BODY=$(echo "$RELEASE_JSON" | jq -r .body | head -n 1 | tr -d '\n' | sed 's/"/\\"/g')
+
+            CACHE_FILE=".release_cache_${repo//\//_}.txt"
+
+            # 变更检测与推送
+            if [ -f $CACHE_FILE ]; then
+              CACHED_TAG=$(cat $CACHE_FILE)
+              if [ "$LATEST_TAG" != "$CACHED_TAG" ] && [ "$LATEST_TAG" != "null" ]; then
+                curl -X POST "https://api.day.app/$BARK_KEY" \
+                  -H "Content-Type: application/json" \
+                  -d '{
+                    "title": "🚀新版本发布: '"$repo@$LATEST_TAG"'",
+                    "body": "版本: '"$RELEASE_NAME"'\n摘要: '"$RELEASE_BODY"'",
+                    "url": "https://github.com/$repo/releases/tag/$LATEST_TAG",
+                    "group": "github_releases",
+                    "sound": "alarm"
+                  }'
+                echo $LATEST_TAG > $CACHE_FILE
+              fi
+            else
+              echo $LATEST_TAG > $CACHE_FILE
+            fi
+          done
