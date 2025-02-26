@@ -28,7 +28,7 @@ jobs:
             if [ -f $CACHE_FILE ]; then
               CACHED_TAG=$(cat $CACHE_FILE)
               if [ "$LATEST_TAG" != "$CACHED_TAG" ] && [ "$LATEST_TAG" != "null" ]; then
-                curl -X POST "https://api.day.app/$BARK_KEY" \
+                curl -X POST "https://bark.fzstudio.top/$BARK_KEY" \
                   -H "Content-Type: application/json" \
                   -d '{
                     "title": "🚀新版本发布: '"$repo@$LATEST_TAG"'",
