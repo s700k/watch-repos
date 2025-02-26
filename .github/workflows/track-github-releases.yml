@@ -1,5 +1,6 @@
 name: Track GitHub Releases
 on:
+  workflow_dispatch:  # 手动触发选项‌:ml-citation{ref="2,6" data="citationList"}
   schedule:
     - cron: "0 */3 * * *"  # 每3小时检查一次‌:ml-citation{ref="2" data="citationList"}
 
