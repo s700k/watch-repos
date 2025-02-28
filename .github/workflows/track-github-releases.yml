@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: 检查目标仓库Releases更新
         env:
-          REPO_LIST: "acidanthera/OpenCorePkg s700k/lms-material"  # 监控仓库列表，空格分隔‌:ml-citation{ref="2" data="citationList"}
+          REPO_LIST: "acidanthera/OpenCorePkg"  # 监控仓库列表，空格分隔‌:ml-citation{ref="2" data="citationList"}
           BARK_KEY: ${{ secrets.BARK_KEY }}          # Bark设备密钥‌:ml-citation{ref="1" data="citationList"}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}          # GitHub API认证令牌‌:ml-citation{ref="2" data="citationList"}
         run: |
